@@ -1,0 +1,55 @@
+Type="modbus"
+
+[[device.em3250.register]]
+Base=0
+Type= "float"
+Cmd= "ReadHolding"
+Tag= "voltage"
+Name= "input-1"
+[[device.em3250.register]]
+Base=0
+Type= "float"
+Cmd= "ReadHolding"
+Tag= "voltage"
+Name= "input-1"
+
+[[device.em3250.register]]
+Base=0
+Type= "Int16"
+Cmd= "ReadHolding"
+Tag= "temperature"
+Name= "temp-1"
+
+[[device.em3250.range]]
+Base=0
+Count=10
+
+[[device.em3250.range]]
+Base=20
+Count=5
+
+
+[[host]]
+Name="user-define-a"
+Interval=10
+Address= "192.168.0.42"
+Port  =  502
+[[host.slave]]
+SlaveId=1
+Device="em3250"
+Name="power-supply"
+Collect = ["voltage-input-1", "voltage-input-2"]
+
+
+[[host]]
+Name="user-define-b"
+Interval=10
+Device= "/dev/ttyUSB0"
+Baudrate= 38400
+[[host.slave]]
+SlaveId=1
+Device="em3250"
+Name="temperature"
+Collect = ["supply-temperature-1"]
+
+
