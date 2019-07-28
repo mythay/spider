@@ -1,24 +1,23 @@
 Type="modbus"
 
-[[device.em3250.register]]
+# [[device.em3250]]
+[device.em3250.register.input-1]
 Base=0
 Type= "float"
 Cmd= "ReadHolding"
 Tag= "voltage"
-Name= "input-1"
-[[device.em3250.register]]
+# [[device.em3250]]
+[device.em3250.register.input-2]
 Base=0
 Type= "float"
 Cmd= "ReadHolding"
 Tag= "voltage"
-Name= "input-1"
-
-[[device.em3250.register]]
+# [[device.em3250]]
+[device.em3250.register.temp-1]
 Base=0
 Type= "Int16"
 Cmd= "ReadHolding"
 Tag= "temperature"
-Name= "temp-1"
 
 [[device.em3250.range]]
 Base=0
