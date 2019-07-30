@@ -43,8 +43,8 @@ Collect = ["voltage-input-1", "voltage-input-2"]
 [[host]]
 Name="user-define-b"
 Interval=10
-Serial= "/dev/ttyUSB0"
-Baudrate= 38400
+Address= "/dev/ttyUSB0"
+BaudRate= 38400
 [[host.slave]]
 SlaveId=1
 Device="em3250"

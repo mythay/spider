@@ -7,11 +7,11 @@ import (
 )
 
 type innerRange struct {
-	org  spider.MbRange
-	calc spider.MbRange
+	org  spider.CfgRange
+	calc spider.CfgRange
 }
 
-func (rag *innerRange) AdjustRange(reg *spider.MbRegister) bool {
+func (rag *innerRange) AdjustRange(reg *spider.CfgRegister) bool {
 	if reg.Base >= rag.org.Base && reg.Last() <= rag.org.Last() {
 		if rag.calc.Base+rag.calc.Count == 0 { // first time, all value are zero
 			rag.calc.Base = reg.Base
@@ -31,8 +31,8 @@ func (rag *innerRange) AdjustRange(reg *spider.MbRegister) bool {
 	return false
 }
 
-func accumulate(collect []string, device *spider.MbDevice) ([]regReq, error) {
-	var regs []regReq
+func accumulate(collect []string, device spider.CfgDevice) ([]spider.CfgRange, error) {
+	var regs []spider.CfgRange
 	rags := make([]innerRange, len(device.Range))
 	for i, rag := range device.Range {
 		rags[i].org = rag
@@ -47,7 +47,7 @@ func accumulate(collect []string, device *spider.MbDevice) ([]regReq, error) {
 				}
 			}
 			if !match {
-				regs = append(regs, regReq{base: reg.Base, count: reg.Count()})
+				regs = append(regs, spider.CfgRange{Base: reg.Base, Count: reg.Count()})
 			}
 		} else {
 			return nil, fmt.Errorf("'%s' reg not exist\n", item)
@@ -55,7 +55,7 @@ func accumulate(collect []string, device *spider.MbDevice) ([]regReq, error) {
 	}
 	for _, rag := range rags {
 		if rag.calc.Base+rag.calc.Count > 0 {
-			regs = append(regs, regReq{base: rag.calc.Base, count: rag.calc.Count})
+			regs = append(regs, spider.CfgRange{Base: rag.calc.Base, Count: rag.calc.Count})
 		}
 	}
 	return regs, nil

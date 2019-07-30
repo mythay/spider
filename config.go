@@ -1,29 +1,34 @@
 package spider
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
 	"github.com/influxdata/toml"
 )
 
-type MbConfig struct {
+type Verifier interface {
+	Verify() (bool, error)
+}
+
+type CfgModbus struct {
 	Type   string
-	Device map[string]MbDevice
-	Host   []MbHost
+	Device map[string]CfgDevice
+	Host   []CfgHost
 }
-type MbDevice struct {
-	Register map[string]MbRegister
-	Range    []MbRange
+type CfgDevice struct {
+	Register map[string]CfgRegister
+	Range    []CfgRange
 }
-type MbRegister struct {
+type CfgRegister struct {
 	Base uint16
 	Type string
 	Cmd  string
 	Tag  string
 }
 
-func (reg *MbRegister) Count() uint16 {
+func (reg *CfgRegister) Count() uint16 {
 	switch reg.Type {
 	case "signed":
 		fallthrough
@@ -43,40 +48,58 @@ func (reg *MbRegister) Count() uint16 {
 		return 0
 	}
 }
-func (reg *MbRegister) Isvalid() bool {
-	return reg.Count() != 0
+func (reg *CfgRegister) Verify() (bool, error) {
+	if reg.Count() != 0 {
+		return true, nil
+	} else {
+		return false, fmt.Errorf(" invalid type'%s'", reg.Type)
+	}
+
 }
-func (reg *MbRegister) Last() uint16{
+func (reg *CfgRegister) Last() uint16 {
 	return reg.Base + reg.Count()
 }
 
-type MbRange struct {
+type CfgRange struct {
 	Base  uint16
 	Count uint16
 }
 
-func(rag * MbRange) Last() uint16{
+func (rag *CfgRange) Last() uint16 {
 	return rag.Base + rag.Count
 }
 
-type MbHost struct {
+type CfgAddrTcp struct {
+	Port uint16
+}
+
+type CfgAddrRtu struct {
+	BaudRate int
+	// Data bits: 5, 6, 7 or 8 (default 8)
+	DataBits int
+	// Stop bits: 1 or 2 (default 1)
+	StopBits int
+	// Parity: N - None, E - Even, O - Odd (default E)
+	// (The use of no parity requires 2 stop bits.)
+	Parity string
+}
+type CfgHost struct {
 	Name     string
 	Interval uint32
 	Address  string
-	Port     uint32
-	Serial   string
-	Baudrate uint32
-	Slave    []MbSlave
+	CfgAddrTcp
+	CfgAddrRtu
+	Slave []CfgSlave
 }
 
-type MbSlave struct {
+type CfgSlave struct {
 	SlaveId uint8
 	Device  string
 	Name    string
 	Collect []string
 }
 
-func LoadMbConfig(path string) (*MbConfig, error) {
+func LoadCfgModbus(path string) (*CfgModbus, error) {
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -87,7 +110,7 @@ func LoadMbConfig(path string) (*MbConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	var config MbConfig
+	var config CfgModbus
 	if err := toml.Unmarshal(buf, &config); err != nil {
 		return nil, err
 	}
